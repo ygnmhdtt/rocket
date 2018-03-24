@@ -1,5 +1,3 @@
-手順
+This is tiny C compiler inspired [8cc](https://github.com/rui314/8cc).
 
-* make
-* echo 2 | ./rocket > tmp.s
-* gcc -o tmp.out driver.c tmp.s
+Please check how to use at test.sh.
