@@ -1,5 +1,5 @@
 PROG := rocket
-SRCS := main.c assembla.c
+SRCS := main.c error.c ast.c
 OBJS := $(SRCS:%.c=%.o)
 
 CC := gcc
@@ -13,4 +13,4 @@ $(PROG): $(OBJS)
 	$(CC) -c $<
 
 clean:
-	rm -f $(PROG) *.o tmp.*
+	@rm -f $(PROG) *.o tmp.*

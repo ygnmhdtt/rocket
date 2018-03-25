@@ -2,25 +2,34 @@
 
 function compile {
   echo "$1" | ./rocket > tmp.s
-  if [ ! $? ]; then
+  if [ $? -ne 0 ]; then
     echo "Failed to compile $1"
     exit
   fi
   gcc -o tmp.out driver.c tmp.s
-  if [ ! $? ]; then
-    echo "Failed to gcc $1"
+  if [ $? -ne 0 ]; then
+    echo "GCC failed"
+    exit
+  fi
+}
+
+function assertequal {
+  if [ "$1" != "$2" ]; then
+    echo "Test failed: $2 expected but got $1"
     exit
   fi
 }
 
 function test {
-  expected="$1"
-  expr="$2"
+  compile "$2"
+  assertequal "$(./tmp.out)" "$1"
+}
 
-  compile "$expr"
-  result="`./tmp.out`"
-  if [ "$result" != "$expected" ]; then
-    echo "Test failed: $expected expected but got $result"
+function testfail {
+  expr="$1"
+  echo "$expr" | ./rocket > /dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    echo "Should fail to compile, but succeded: $expr"
     exit
   fi
 }
@@ -28,8 +37,20 @@ function test {
 make -s rocket
 
 test 0 0
-test 42 42
 test abc '"abc"'
 
-rm -f tmp.out tmp.s
+test 3 '1+2'
+test 3 '1 + 2'
+test 10 '1+2+3+4'
+test 11 '1+2*3+4'
+test 14 '1*2+3*4'
+test 4 '4/2+6/3'
+test 3 '24/2/4'
+
+testfail '"abc'
+testfail '0abc'
+testfail '1+'
+testfail '1+"abc"'
+
 echo "All tests passed"
+make clean
