@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 )
 
 type operator int
+
+var logger *log.Logger
 
 const (
 	INT = "INT"
@@ -75,8 +78,11 @@ func (ast Ast) print() {
 }
 
 func readNumber(expr string) *Ast {
+	logger.Printf("expr: %v", expr)
 	var num int
 	for _, r := range expr {
+		logger.Printf("r: %v", string(r))
+		logger.Printf("num: %v", num)
 		n, err := strconv.Atoi(string(r))
 		if err != nil {
 			return astInt(num)
@@ -92,6 +98,7 @@ func readString(expr string) *Ast {
 
 func readPrim(expr string) *Ast {
 	firstChar := string(expr[0])
+	logger.Printf("firstChar: %v", firstChar)
 
 	_, err := strconv.Atoi(firstChar)
 	if err == nil {
@@ -104,6 +111,7 @@ func readPrim(expr string) *Ast {
 }
 
 func priority(op string) int {
+	logger.Printf("op: %v", op)
 	switch op {
 	case "+":
 	case "-":
@@ -112,7 +120,7 @@ func priority(op string) int {
 	case "/":
 		return 2
 	default:
-		printError("Unknown binary operator: %v", op)
+		printError("Unknown binary operator: %v\n", op)
 		return 0
 	}
 	return 0
@@ -121,7 +129,10 @@ func priority(op string) int {
 func newAst(prec int) *Ast {
 	expr := os.Args[1]
 	ast := readPrim(expr)
+	logger.Printf("ast.kind: %v", ast.kind)
+	logger.Printf("ast.ival: %v", ast.ival)
 	for _, r := range expr {
+		logger.Printf("r: %v", string(r))
 		if string(r) == " " {
 			continue
 		}
@@ -135,6 +146,8 @@ func newAst(prec int) *Ast {
 }
 
 func main() {
+	logger = log.New(os.Stdout, "logger: ", log.Lshortfile)
+	logger.Print("start")
 	ast := newAst(0)
 	ast.print()
 	os.Exit(0)
